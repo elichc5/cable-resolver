@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Decodificador de Cables Eléctricos · CENELEC / IEC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-white">
+        ⚡ Decodificador de Cables Eléctricos
+      </h1>
+      <p class="mt-2 text-slate-400">
+        Interpreta designaciones de cables bajo el estándar armonizado
+        <span class="font-semibold text-slate-300">CENELEC (HD 361 S3)</span>,
+        compatible con el mismo principio de <span class="font-semibold text-slate-300">IEC</span>.
+      </p>
+    </header>
+
+    <form method="post" class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
+      <label for="cable_code" class="block text-sm font-medium text-slate-300 mb-2">
+        Código de cable
+      </label>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          id="cable_code"
+          name="cable_code"
+          value="{{ submitted_code }}"
+          placeholder="Ej. H07RN-F 3G1.5"
+          autocomplete="off"
+          class="flex-1 rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-wide"
+        >
+        <button
+          type="submit"
+          class="rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-6 py-2.5 transition-colors"
+        >
+          Decodificar
+        </button>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <span class="text-xs text-slate-500 mr-1 self-center">Ejemplos:</span>
+        {% for example in example_codes %}
+        <button
+          type="button"
+          onclick="document.getElementById('cable_code').value='{{ example }}';"
+          class="text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full px-3 py-1 border border-slate-700 transition-colors"
+        >{{ example }}</button>
+        {% endfor %}
+      </div>
+    </form>
+
+    {% if error %}
+    <div class="mt-6 bg-red-950/50 border border-red-800 rounded-xl p-5 flex gap-3">
+      <span class="text-red-400 text-xl leading-none">⚠</span>
+      <div>
+        <p class="font-semibold text-red-300">No se pudo decodificar el código</p>
+        <p class="text-red-200/90 text-sm mt-1">{{ error }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <section class="mt-6 bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
+      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-6 border-b border-slate-800 pb-4">
+        <h2 class="text-xl font-bold text-white">Resultado del análisis</h2>
+        <span class="font-mono text-amber-400 text-lg">{{ result.normalized_code }}</span>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Relación de armonización</p>
+          <p class="font-mono text-amber-400 text-lg">{{ result.harmonization.code }}</p>
+          <p class="text-slate-300 text-sm mt-1">{{ result.harmonization.label }}</p>
+        </div>
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Tensión nominal</p>
+          <p class="font-mono text-amber-400 text-lg">{{ result.voltage.code }}</p>
+          <p class="text-slate-300 text-sm mt-1">{{ result.voltage.label }}</p>
+        </div>
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Material de aislamiento</p>
+          <p class="font-mono text-amber-400 text-lg">{{ result.insulation.code }}</p>
+          <p class="text-slate-300 text-sm mt-1">{{ result.insulation.label }}</p>
+        </div>
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Material de cubierta</p>
+          {% if result.sheath %}
+          <p class="font-mono text-amber-400 text-lg">{{ result.sheath.code }}</p>
+          <p class="text-slate-300 text-sm mt-1">{{ result.sheath.label }}</p>
+          {% else %}
+          <p class="font-mono text-slate-500 text-lg">—</p>
+          <p class="text-slate-500 text-sm mt-1">Sin cubierta (cable sin envoltura exterior)</p>
+          {% endif %}
+        </div>
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Tipo de conductor</p>
+          <p class="font-mono text-amber-400 text-lg">{{ result.conductor_type.code }}</p>
+          <p class="text-slate-300 text-sm mt-1">{{ result.conductor_type.label }}</p>
+        </div>
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Toma a tierra</p>
+          <p class="font-mono text-amber-400 text-lg">{{ result.earth.code }}</p>
+          <p class="text-slate-300 text-sm mt-1">{{ result.earth.label }}</p>
+        </div>
+
+        <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700 sm:col-span-2">
+          <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">Conductores y sección</p>
+          <p class="text-slate-200">
+            <span class="font-mono text-amber-400 text-lg">{{ result.conductors_count }}</span>
+            conductor(es) de
+            <span class="font-mono text-amber-400 text-lg">{{ result.section_mm2 }} mm²</span>
+            cada uno.
+          </p>
+        </div>
+
+      </div>
+    </section>
+    {% endif %}
+
+    <footer class="mt-10 text-center text-xs text-slate-600">
+      Basado en la designación armonizada CENELEC HD 361 S3 (equivalente al principio IEC).
+    </footer>
+
+  </div>
+</body>
+</html>
